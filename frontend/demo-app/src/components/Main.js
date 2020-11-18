@@ -128,118 +128,27 @@ class Main extends Component {
               container
               className={classes.grid}
             >
-              <Grid item xs={12} md={4}>
-                <Paper className={classes.paper}>
-                  <div className={classes.box}>
-                    <Typography
-                      style={{ textTransform: "uppercase" }}
-                      color="secondary"
-                      gutterBottom
-                    >
-                      First title
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      A first title style <br /> with two lines
-                    </Typography>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      className={classes.actionButtom}
-                    >
-                      Learn more
-                    </Button>
-                  </div>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Paper className={classes.paper}>
-                  <div className={classes.box}>
-                    <Typography
-                      style={{ textTransform: "uppercase" }}
-                      color="secondary"
-                      gutterBottom
-                    >
-                      Another box
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                      A default box
-                    </Typography>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      className={classes.actionButtom}
-                    >
-                      Learn more
-                    </Button>
-                  </div>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Paper className={classes.paper}>
-                  <div className={classes.box}>
-                    <Typography
-                      style={{ textTransform: "uppercase" }}
-                      color="secondary"
-                      gutterBottom
-                    >
-                      A box with a carousel
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                      If you click in Getting Started, you will see a nice
-                      carousel
-                    </Typography>
-                  </div>
-                  <div className={classes.alignRight}>
-                    <Button
-                      onClick={this.openDialog}
-                      variant="outlined"
-                      className={classes.actionButtom}
-                    >
-                      Learn more
-                    </Button>
-                    <Button
-                      onClick={this.openGetStartedDialog}
-                      color="primary"
-                      variant="contained"
-                      className={classes.actionButtom}
-                    >
-                      Dashboard
-                    </Button>
-                  </div>
-                </Paper>
-              </Grid>
-              <Grid container item xs={12}>
+
                 <Grid item xs={12}>
                   <Paper className={classes.paper}>
                     <div>
+
                       <div className={classes.box}>
                         <Typography color="secondary" gutterBottom>
-                          Full box
+                          Welcome!
                         </Typography>
                         <Typography variant="body1" gutterBottom>
-                          This is an example of a full-width box
+                          This is a Distributed Measurement System
                         </Typography>
                       </div>
-                      <div className={classes.alignRight}>
-                        <Button
-                          color="primary"
-                          variant="contained"
-                          className={classes.actionButtom}
-                        >
-                          Learn more
-                        </Button>
-                      </div>
+                      
                     </div>
                   </Paper>
                 </Grid>
               </Grid>
             
             </Grid>
-          </Grid>
+          
 
         </div>
       </React.Fragment>

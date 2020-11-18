@@ -12,9 +12,14 @@ const Menu = [
       pathname: "/customExp"
     },
     {
+      label: "Offline Integration",
+      pathname: "/offlineIntegration"
+    },
+    {
       label: "Doc",
       pathname: "/doc"
     },
+
 
 
   
