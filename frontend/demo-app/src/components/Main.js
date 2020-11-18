@@ -138,7 +138,8 @@ class Main extends Component {
                           Welcome!
                         </Typography>
                         <Typography variant="body1" gutterBottom>
-                          This is a Distributed Measurement System
+                          This is a Distributed Measurement System For Any VISA & GPIB protocol Instruments
+                          
                         </Typography>
                       </div>
                       
