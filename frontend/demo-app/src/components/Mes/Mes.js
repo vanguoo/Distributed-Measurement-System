@@ -8,6 +8,7 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import SimpleLineChart from "../Charts/Demo";
+import CPUPercentChart from "../Charts/CPUPercent";
 import Topbar from "../Topbar";
 
 // table dependency
@@ -160,7 +161,7 @@ function SimpleTabs() {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-};
+  };
 
 return (
 <div className={classes.root}>
@@ -227,7 +228,7 @@ return (
 
   <TabPanel value={value} index={1}>
 
-  <SimpleLineChart/>
+  <CPUPercentChart/>
 
   </TabPanel>
   
