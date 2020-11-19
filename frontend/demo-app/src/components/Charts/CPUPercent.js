@@ -10,7 +10,7 @@ import {
   } from 'recharts';
 
 
-const socket = io('http://39.99.222.289:39002', {
+const socket = io('http://39.99.222.189:39002', {
   transports: ['websocket', 'polling']
 });
 
@@ -47,7 +47,7 @@ function Polt() {
     <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
 
   </LineChart>
-  );
+  
 
       </div>
     );
