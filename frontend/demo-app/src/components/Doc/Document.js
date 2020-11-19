@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component } from "react";
 import withStyles from "@material-ui/styles/withStyles";
 import { withRouter } from "react-router-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -7,18 +7,14 @@ import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import SimpleLineChart from "../Charts/Demo";
 import Topbar from "../Topbar";
 
-// table dependency
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-
-
 
 
 const styles = theme => ({
@@ -111,7 +107,6 @@ const styles = theme => ({
 });
 
 
-
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -166,9 +161,9 @@ return (
 <div className={classes.root}>
   <AppBar position="static">
     <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
-      <Tab label="IV Loop" {...a11yProps(0)} />
-      <Tab label="Pulse" {...a11yProps(1)} />
-      <Tab label="Only Mode" {...a11yProps(2)} />
+      <Tab label="Meter Manuals" {...a11yProps(0)} />
+      <Tab label= "Custom-Exp Manuals" {...a11yProps(1)} />
+      <Tab label="..." {...a11yProps(2)} />
       
     </Tabs>
   </AppBar>
@@ -183,41 +178,6 @@ return (
       alignItems="center"
     >   
 
-    <SimpleLineChart/>
-
-    <SimpleLineChart/>
-
-        <Paper >
-        <Typography variant="body1">
-        Input Box      
-        </Typography>
-
-        <Grid item xs={6} >
-          <TextField id="standard-basic" label="start" variant="standard" />
-        </Grid>
-
-        <Grid item xs={6} >
-          <TextField id="standard-basic" label="stop" variant="standard" />
-        </Grid>
-
-        <Grid item xs={6}  >
-          <TextField id="standard-basic" label="step" variant="standard" />
-        </Grid>
-
-        <Grid item xs>
-        <Button variant="contained" color="primary">
-          Start
-        </Button>
-        </Grid>
-
-        <Grid item xs>
-        <Button variant="contained" color="secondary">
-          Stop
-        </Button>
-        </Grid>
-
-        </Paper>
-
 
 
     </Grid>
@@ -225,16 +185,24 @@ return (
 
   </TabPanel>
 
+
+  
+
+
   <TabPanel value={value} index={1}>
 
-  <SimpleLineChart/>
+  
 
+
+  
   </TabPanel>
   
   
   <TabPanel value={value} index={2}>
     
-  <SimpleLineChart/>
+  
+
+  
 
   </TabPanel>
 
@@ -243,84 +211,22 @@ return (
 );
 }
 
+class Documents extends Component{
 
-class Mes extends Component {
-  state = {
+    
+    render() {
+        const { classes } = this.props;
+        const currentPath = this.props.location.pathname;
 
-    amount: 15000,
-    period: 3,
-    start: 0,
-    monthlyInterest: 0,
-    totalInterest: 0,
-    monthlyPayment: 0,
-    totalPayment: 0,
-    data: []
-  };
+        return (
+            <React.Fragment>
+            <CssBaseline />
+            <Topbar currentPath={currentPath} />
 
-  updateValues() {
-    const { amount, period, start } = this.state;
-    const monthlyInterest =
-      (amount * Math.pow(0.01 * 1.01, period)) / Math.pow(0.01, period - 1);
-    const totalInterest = monthlyInterest * (period + start);
-    const totalPayment = amount + totalInterest;
-    const monthlyPayment =
-      period > start ? totalPayment / (period - start) : totalPayment / period;
 
-    const data = Array.from({ length: period + start }, (value, i) => {
-      const delayed = i < start;
-      return {
-        Type: delayed ? 0 : Math.ceil(monthlyPayment).toFixed(0),
-        OtherType: Math.ceil(monthlyInterest).toFixed(0)
-      };
-    });
-
-    this.setState({
-      monthlyInterest,
-      totalInterest,
-      totalPayment,
-      monthlyPayment,
-      data
-    });
-  }
-
-  componentDidMount() {
-    this.updateValues();
-  }
-
-  handleChangeAmount = (event, value) => {
-    this.setState({ amount: value, loading: false });
-    this.updateValues();
-  };
-
-  handleChangePeriod = (event, value) => {
-    this.setState({ period: value, loading: false });
-    this.updateValues();
-  };
-
-  handleChangeStart = (event, value) => {
-    this.setState({ start: value, loading: false });
-    this.updateValues();
-  };
-
-  
-
-  render() {
-    const { classes } = this.props;
-
-    const currentPath = this.props.location.pathname;
-
-    return (
-      <React.Fragment>
-        <CssBaseline />
-        <Topbar currentPath={currentPath} />
-        <div className={classes.root}>
-
-            {/* Dashboard */}
             <Grid container alignItems="left" 
-              justify="center"
-              
+              justify="center"    
             >
-
               <Grid item xs={12}>
 
                 <Paper className={classes.paper}> 
@@ -328,11 +234,11 @@ class Mes extends Component {
                   <div className={classes.block}>
 
                     <Typography variant="h6" color="secondary" gutterBottom>
-                      Measurement Dashboard
+                    Welcome! 
                     </Typography>
 
-                    <Typography variant="body1">
-                      Here is the complete measurement service.
+                    <Typography variant="body1" gutterBottom>
+                    Here you can find instruments manuals
                     </Typography>
                   </div>
                 </Paper>
@@ -341,19 +247,18 @@ class Mes extends Component {
 
             </Grid>
 
-
             <div>
-              <SimpleTabs />
+              <SimpleTabs/>
             </div>
 
-         
 
-        </div>
+            </React.Fragment>
+        );
 
-      </React.Fragment>
+    }
 
-    );
-  }
 }
 
-export default withRouter(withStyles(styles)(Mes));
+
+
+export default withRouter(withStyles(styles)(Documents));

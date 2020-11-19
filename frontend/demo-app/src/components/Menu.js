@@ -16,7 +16,7 @@ const Menu = [
       pathname: "/offlineIntegration"
     },
     {
-      label: "Doc",
+      label: "Documents",
       pathname: "/doc"
     },
 

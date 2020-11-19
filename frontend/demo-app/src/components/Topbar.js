@@ -111,13 +111,15 @@ class Topbar extends Component {
     return (
       <AppBar position="absolute" color="default" className={classes.appBar}>
         <Toolbar>
+
           <Grid container spacing={10} alignItems="baseline">
             <Grid item xs={12} className={classes.flex}>
 
               <div className={classes.inline}>
-                <Typography variant="h6" color="inherit" noWrap>
+                <Typography variant="h6" color="initial" noWrap>
                   <Link to="/" className={classes.link}>
-                    <img width={20} src={logo} alt="" />
+                    <img width={12} src={logo} alt="" />
+
                     <span className={classes.tagline}>Online Measurement System</span>
                   </Link>
                 </Typography>
@@ -125,11 +127,6 @@ class Topbar extends Component {
 
               {!this.props.noTabs && (
                 <React.Fragment>
-                  
-                  {/* <div className={classes.productLogo}>
-                    <Typography></Typography>
-                  </div> */}
-
 
                   <div className={classes.iconContainer}>
                     <IconButton
@@ -141,6 +138,7 @@ class Topbar extends Component {
                       
                     </IconButton>
                   </div>
+
                   <div className={classes.tabContainer}>
                     <SwipeableDrawer
                       anchor="right"
@@ -169,6 +167,7 @@ class Topbar extends Component {
                           </ListItem>
                         ))}
                       </List>
+                      
                     </SwipeableDrawer>
                     <Tabs
                       value={this.current() || this.state.value}

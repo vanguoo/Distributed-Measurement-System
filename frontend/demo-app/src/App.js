@@ -13,6 +13,7 @@ import ScrollToTop from './components/ScrollTop'
 import Mes from "./components/Mes/Mes";
 import CustomExp from "./components/CustomExp/customExp";
 import OfflineIntegration from "./components/Offline/offlineIntegration";
+import Doc from "./components/Doc/Document";
 
 
 const theme = createMuiTheme({
@@ -47,6 +48,7 @@ class App extends Component {
                 <Route exact path='/mes' component={ Mes }/>
                 <Route exact path='/customExp' component={CustomExp}/>
                 <Route exact path='/offlineIntegration' component={OfflineIntegration}/>
+                <Route exact path='/doc' component={ Doc }/>
 
 
             </Switch>
