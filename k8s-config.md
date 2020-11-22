@@ -39,44 +39,48 @@ Kubernetes 项目的本质，是为用户提供一个具有普遍意义的容器
 
 # 实战：
 
-## docker install
+## 安装docker
 https://www.cnblogs.com/walker-lin/p/11214127.html
 
 
-## update resource list:
+## 安装kubernetes
 
-### add source
+添加源：
 
+```
 cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
 deb http://mirrors.ustc.edu.cn/kubernetes/apt kubernetes-xenial main
 EOF
-
-then:
+```
+更新：
 
 ```
 apt-get update
 ```
 
-for error:
+找不到公钥错误：
 
 ```
 GPG error: http://mirrors.ustc.edu.cn/kubernetes/apt kubernetes-xenial InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 6A030B21BA07F4FB
 ```
 
-lack the public key add  key:
+添加公钥：
 
-gpg --keyserver keyserver.ubuntu.com --recv-keys <last 8 bit of key>
-gpg --export --armor <last 8 bit of key> | sudo apt-key add -
+```
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6A030B21BA07F4FB
+```
 
-ref:
-https://zhuanlan.zhihu.com/p/46341911
+> ref: https://zhuanlan.zhihu.com/p/46341911  &&  https://blog.csdn.net/yz1988computer/article/details/81675553
+
+
 
 下载
 
 ```
-sudo apt-get update
-sudo apt-get install -y kubelet kubeadm kubectl
+apt-get update
+apt-get install -y kubelet kubeadm kubectl
 ```
+
 
 
 ## 执行kubeadm init
