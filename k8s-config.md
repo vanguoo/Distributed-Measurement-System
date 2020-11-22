@@ -8,7 +8,9 @@
 
 - 一台或多台机器，操作系统为Centos7.x, ubuntu16.4
 - 硬件配置：2GB或更多GAM，2个CPU或更多CPU，硬盘30G
-> master需要2核
+> master强制要求需要双核: error execution phase preflight: [preflight] Some fatal errors occurred:
+	[ERROR NumCPU]: the number of available CPUs 1 is less than the required 2
+
 - 集群中所有机器之间网络互通
 - 可以访问外网，需要拉取镜像
 - 禁止swap分区
