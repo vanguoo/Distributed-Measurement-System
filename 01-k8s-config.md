@@ -563,9 +563,5 @@ kubeadm 就会为集群生成一个 bootstrap token. 在后面，只要持有这
 
 
 
-### kubeadm join 的工作流程
-
-
-
 
 

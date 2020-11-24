@@ -9,6 +9,11 @@ pod知识共享了资源的一组容器， 而共享资源的方式就是
 
 Pod 里的所有容器，共享的是同一个 Network Namespace，并且可以声明共享同一个 Volume。
 
+Pod 的实现需要使用一个中间容器，这个容器叫作 Infra 容器。在这个 Pod 中，Infra 容器永远都是第一个被创建的容器，而其他用户定义的容器，则通过 Join Network Namespace 的方式，与 Infra 容器关联在一起。这样的组织关系，可以用下面这样一个示意图来表达：
+
+![pod](images/pod.png)
+
+
 pod在kubernetes项目中有一个重要意义，就是**容器设计模式**
 
 Pod 这种“超亲密关系”容器的设计思想，实际上就是希望，当用户想在一个容器里跑多个功能并不相关的应用时，应该优先考虑它们是不是更应该被描述成一个 Pod 里的多个容器。
@@ -54,7 +59,7 @@ war包不是一个普通容器，而是一个init Container类型的容器，这
 
 sidecar 指的就是我们可以在一个 Pod 中，启动一个辅助容器，来完成一些独立于主进程（主容器）之外的工作。
 
-#### 总结
+### 总结
 "上云"工作的完成，还是要深入理解容器的本质。即，进程。
 
 Pod，实际上是在扮演传统基础设施里“虚拟机”的角色；而容器，则是这个虚拟机里运行的用户程序。
@@ -78,9 +83,9 @@ Pod看成传统环境中的”机器“，容器看成运行在”机器“中�
 https://github.com/kubernetes/api/blob/master/core/v1/types.go
 第2914行  podSepc
 
-最重要的字段Container
 
-创建
+- 创建
+
  ```
 apiVersion: v1
 kind: Pod
@@ -100,7 +105,7 @@ spec:
 kubectl create -f nginx.yaml
 ```
 
-查看 & 执行
+- 查看 & 执行
 ```
 
 root@van-master:~# kubectl get pods
@@ -126,10 +131,8 @@ pod中容器要共享宿主机的namespace，也是pod级别的定义。
 
 pod最重要的字段，Container, 两个字段都属于pod对容器的定义，
 
-Pod API 对象是整个k8s体系中最核心的概念，各种控制器也要用到的。
 
-
-创建 & 删除pod对象
+- 创建 & 删除pod对象
 
 ```
 kubectl create -f pod.yaml
