@@ -17,6 +17,32 @@
 
 ## 准备工作
 
+```
+# 关闭selinux
+# 永久关闭
+sed -i 's/enforcing/disabled/' /etc/selinux/config  
+# 临时关闭
+setenforce 0  
+
+# 关闭swap
+# 临时
+swapoff -a 
+# 永久关闭
+sed -ri 's/.*swap.*/#&/' /etc/fstab
+```
+
+
+```
+# 将桥接的IPv4流量传递到iptables的链
+cat > /etc/sysctl.d/k8s.conf << EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+# 生效
+sysctl --system  
+
+```
+
 
 
 ## 安装docker
@@ -63,17 +89,99 @@ apt-get install -y kubelet kubeadm kubectl
 
 
 
-## 执行kubeadm init
+### 部署集群
+使用 yaml文件部署
 
 
-(已经执行过的)
 ```
-root@k8s-master:/home/van/Desktop# kubeadm init
-I1122 17:37:28.561574   22656 version.go:252] remote version is much newer: v1.19.4; falling back to: stable-1.18
-W1122 17:37:29.980525   22656 configset.go:202] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: stable-1.18
+imageRepository: "registry.aliyuncs.com/google_containers"
+networking:
+    podSubnet: "10.244.0.0/16"
+
+```
+
+执行命令部署
+```
+kubeadm init --config=kubeadm.yaml
+```
+
+
+
+```
+W1123 20:29:16.142145   30049 configset.go:202] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]
 [init] Using Kubernetes version: v1.18.12
 [preflight] Running pre-flight checks
 	[WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Starting the kubelet
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+[certs] Generating "ca" certificate and key
+[certs] Generating "apiserver" certificate and key
+[certs] apiserver serving cert is signed for DNS names [van-master kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.96.0.1 192.168.0.101]
+[certs] Generating "apiserver-kubelet-client" certificate and key
+[certs] Generating "front-proxy-ca" certificate and key
+[certs] Generating "front-proxy-client" certificate and key
+[certs] Generating "etcd/ca" certificate and key
+[certs] Generating "etcd/server" certificate and key
+[certs] etcd/server serving cert is signed for DNS names [van-master localhost] and IPs [192.168.0.101 127.0.0.1 ::1]
+[certs] Generating "etcd/peer" certificate and key
+[certs] etcd/peer serving cert is signed for DNS names [van-master localhost] and IPs [192.168.0.101 127.0.0.1 ::1]
+[certs] Generating "etcd/healthcheck-client" certificate and key
+[certs] Generating "apiserver-etcd-client" certificate and key
+[certs] Generating "sa" key and public key
+[kubeconfig] Using kubeconfig folder "/etc/kubernetes"
+[kubeconfig] Writing "admin.conf" kubeconfig file
+[kubeconfig] Writing "kubelet.conf" kubeconfig file
+[kubeconfig] Writing "controller-manager.conf" kubeconfig file
+[kubeconfig] Writing "scheduler.conf" kubeconfig file
+[control-plane] Using manifest folder "/etc/kubernetes/manifests"
+[control-plane] Creating static Pod manifest for "kube-apiserver"
+[control-plane] Creating static Pod manifest for "kube-controller-manager"
+W1123 20:29:19.467600   30049 manifests.go:225] the default kube-apiserver authorization-mode is "Node,RBAC"; using "Node,RBAC"
+[control-plane] Creating static Pod manifest for "kube-scheduler"
+W1123 20:29:19.468356   30049 manifests.go:225] the default kube-apiserver authorization-mode is "Node,RBAC"; using "Node,RBAC"
+[etcd] Creating static Pod manifest for local etcd in "/etc/kubernetes/manifests"
+[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests". This can take up to 4m0s
+[apiclient] All control plane components are healthy after 21.502402 seconds
+[upload-config] Storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
+[kubelet] Creating a ConfigMap "kubelet-config-1.18" in namespace kube-system with the configuration for the kubelets in the cluster
+[upload-certs] Skipping phase. Please see --upload-certs
+[mark-control-plane] Marking the node van-master as control-plane by adding the label "node-role.kubernetes.io/master=''"
+[mark-control-plane] Marking the node van-master as control-plane by adding the taints [node-role.kubernetes.io/master:NoSchedule]
+[bootstrap-token] Using token: y28ukv.di3fwf6maxm5zxi0
+[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to get nodes
+[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+[bootstrap-token] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+[bootstrap-token] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[bootstrap-token] Creating the "cluster-info" ConfigMap in the "kube-public" namespace
+[kubelet-finalize] Updating "/etc/kubernetes/kubelet.conf" to point to a rotatable kubelet client certificate and key
+[addons] Applied essential addon: CoreDNS
+[addons] Applied essential addon: kube-proxy
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 192.168.0.101:6443 --token y28ukv.di3fwf6maxm5zxi0 \
+    --discovery-token-ca-cert-hash sha256:889d580725ffe3a1500b0db7f420038e96004e2daa928b9663137ed9b6e62e22
 
 ```
 
@@ -85,15 +193,31 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-执行完成后，我们使用下面命令，查看我们正在运行的节点
+添加这些命令的原因是，
+Kubernetes 集群默认需要加密方式访问。所以，这几条命令，就是将刚刚部署生成的 Kubernetes 集群的安全配置文件，保存到当前用户的.kube 目录下，kubectl 默认会使用这个目录下的授权信息访问 Kubernetes 集群。
+
+
+
+由于多次失败，需要重置worker中的配置。
 
 ```
-root@k8s-master:/etc/kubernetes/manifests# kubectl get nodes
-NAME         STATUS     ROLES    AGE    VERSION
-k8s-master   NotReady   master   105m   v1.18.5
+kubeadm reset
 ```
 
-#### 现在就可以加入node节点了
+
+
+
+#### 加入node节点
+
+添加节点：在node上操作
+
+```
+kubeadm join 192.168.0.101:6443 --token y28ukv.di3fwf6maxm5zxi0 \
+    --discovery-token-ca-cert-hash sha256:889d580725ffe3a1500b0db7f420038e96004e2daa928b9663137ed9b6e62e22a
+```
+
+
+
 使用token加入 集群，但是token是24小时制
 有关token操作 ：https://kubernetes.io/zh/docs/reference/setup-tools/kubeadm/kubeadm-token/
 
@@ -118,12 +242,7 @@ token过期以后：执行
 kubeadm token create --print-join-command
 ```
 
-添加节点：在node上操作
 
-```
-kubeadm join 192.168.1.112:6443 --token bd2i8l.nqg2pzbgucebx5k4 \
-    --discovery-token-ca-cert-hash sha256:8e91db11a11dcaf48a04aca39a8654d6989a9357f2327aa5e6d54d818d30277a
-```
 
 输出：
 
@@ -148,53 +267,109 @@ This node has joined the cluster:
 Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 
 ```
-查看节点：
-```
-root@k8s-master:~# kubectl get nodes
-NAME         STATUS     ROLES    AGE     VERSION
-k8s-master   NotReady   master   3h59m   v1.18.5
-k8s-node1    NotReady   <none>   46s     v1.18.5
-
-```
-可以看到节点还是notready，需要在节点之间建立连接
+加入成功
 
 
 
-部署CNI网络插件 - flannel
-```
-# 下载网络插件配置
-wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-```
 
-默认镜像地址无法访问，sed命令修改为docker hub镜像仓库。
-```
+#### 部署容器网络接口，CNI网络插件 - flannel
+
+
 # 添加
+
+```
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
 
+或者:
 ```
-root@k8s-master:~# kubectl get pods -n kube-system
+wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+kubectl apply -f  kube-flannel.yml
+```
+
+
+> 注意：每个集群只能安装一个 Pod 网络。因为科学上网的问题，需要执行以下步骤：
+
+```
+# 在https://www.ipaddress.com/查询raw.githubusercontent.com的真实IP。
+sudo vim /etc/hosts
+199.232.28.133 raw.githubusercontent.com
+
+```
+> 注意：有多个网卡,需要在kube-flannel.yaml 中加入:
+
+```
+args:
+- --ip-masq
+- --kube-subnet-mgr
+- --iface=<网卡名称>
+```
+
+
+
+
+
+### 状态异常重置n次
+
+
+发现其中两个pods状态是container creating， 查看日志：
+
+```
+root@van-master:~# kubectl get pods -n kube-system
 NAME                                 READY   STATUS              RESTARTS   AGE
-coredns-7ff77c879f-8p4cs             0/1     ContainerCreating   0          4h1m
-coredns-7ff77c879f-pq5m7             0/1     ContainerCreating   0          4h1m
-etcd-k8s-master                      1/1     Running             0          4h1m
-kube-apiserver-k8s-master            1/1     Running             0          4h1m
-kube-controller-manager-k8s-master   1/1     Running             0          4h1m
-kube-flannel-ds-57hlw                0/1     CrashLoopBackOff    3          2m33s
-kube-flannel-ds-dt546                1/1     Running             2          7m29s
-kube-proxy-8542n                     1/1     Running             0          4h1m
-kube-proxy-d2zld                     1/1     Running             0          2m33s
-kube-scheduler-k8s-master            1/1     Running             0          4h1m
+coredns-7ff77c879f-bk6j8             0/1     ContainerCreating   0          81m
+coredns-7ff77c879f-j9khn             0/1     ContainerCreating   0          81m
+
+root@van-master:~# kubectl logs coredns-7ff77c879f-bk6j8 -n kube-system
+Error from server (BadRequest): container "coredns" in pod "coredns-7ff77c879f-bk6j8" is waiting to start: ContainerCreating
 
 ```
 
+状态异常：
+
 ```
-root@k8s-master:~# kubectl get nodes
-NAME         STATUS   ROLES    AGE     VERSION
-k8s-master   Ready    master   4h2m    v1.18.5
-k8s-node1    Ready    <none>   3m24s   v1.18.5
+
+root@van-master:~# kubectl get pods -n kube-system
+NAME                                 READY   STATUS             RESTARTS   AGE
+coredns-7ff77c879f-q7dtt             0/1     CrashLoopBackOff   1          18m
 ```
-此时状态可以发现
+
+
+查看日志：
+
+```
+root@van-master:~# kubectl logs -f coredns-7ff77c879f-q7dtt -n kube-system
+.:53
+[INFO] plugin/reload: Running configuration MD5 = 4e235fcc3696966e76816bcd9034ebc7
+CoreDNS-1.6.7
+linux/amd64, go1.13.6, da7f65b
+[FATAL] plugin/loop: Loop (127.0.0.1:53742 -> :53) detected for zone ".", see https://coredns.io/plugins/loop#troubleshooting. Query: "HINFO 2509125342931225420.4366682597458281349."
+```
+
+卸载网络插件：
+```
+kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+ifconfig cni0 down
+ip link delete cni0
+ifconfig flannel.1 down
+ip link delete flannel.1
+rm -rf /var/lib/cni/
+rm -f /etc/cni/net.d/*
+注：执行完上面的操作，重启kubelet
+
+```
+
+
+再次重置：
+```
+kubectl drain van-master --delete-local-data --force --ignore-daemonsets
+kubectl delete node van-master
+kubeadm reset
+```
+
+
+
 
 
 ### 测试集群
