@@ -15,7 +15,7 @@ const socket = io('http://39.99.222.189:39002', {
 });
 
 
-function Polt() {
+function Plot() {
 
     const [data, setData] = useState([]);
 
@@ -57,7 +57,7 @@ export default class Example extends React.Component {
 
     render() {
       return (
-        <Polt/>
+        <Plot/>
       );
     }
   }
