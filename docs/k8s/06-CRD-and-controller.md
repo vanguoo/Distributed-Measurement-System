@@ -65,6 +65,15 @@ spec:
 - scope：该API生效范围，可以设置为：Namespaced（定义的Network是一个属于Namespace的对象）和Cluster（在集群范围内生效，不局限与任何Namesapce）默认值为Namespaced
 - versions：设置CRD支持的版本
 
+使用命令创建CRD对象，
+```
+$ kubectl create -f demoCRD.yaml
+customresourcedefinition.apiextensions.k8s.io/networks.samplecrd.k8s.io created
+
+$ kubectl  get CustomResourceDefinition
+NAME                        CREATED AT
+networks.samplecrd.k8s.io   2020-11-27T07:37:00Z
+```
 
 
 ```
