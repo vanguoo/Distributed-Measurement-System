@@ -1,4 +1,4 @@
-## kubernetes的声明式API编程范式
+# kubernetes的声明式API编程范式
 为了能够使得k8s集群工作，都需要编写一个声明了各种API对象的yaml文件交给kubernetes，从而去执行各种工作。
 这就叫做**声明式API编程**
 
@@ -68,7 +68,17 @@ Istio最核心组件是pod里的Envoy容器
 
 ...
 
-## API对象的原理
+
+### 总结 - 从k8s用户到k8s玩家
+- 如何使用**控制器模式**，同 Kubernetes 里 API 对象的“增、删、改、查”进行协作，进而完成用户业务逻辑的编写
+- 如何理解“k8s编程范式”， 如何为k8s添加自定义API对象，编写自定义控制器。**这个是“晋级”的关键**
+
+
+
+
+
+
+# API对象的原理
 
 
 问题：
@@ -86,4 +96,15 @@ Istio最核心组件是pod里的Envoy容器
 ![](https://tva1.sinaimg.cn/large/0081Kckwgy1gl194s483aj31fv0ksk4y.jpg)
 
 
-- 首先
+- 首先，发起创建对象的POST请求，yaml文件交给APIServer，APIserver过滤请求，
+
+- 进入MUX, Route流程，它是APIserver完成url和handler绑定场所。APIserver的handler要做的事情是匹配cronJob类型定义
+
+- APIserver开始创建对象，
+APIServer 会进行一个 Convert 工作，即：把用户提交的 YAML 文件，转换成一个叫作 Super Version 的对象，它正是该 API 资源类型所有版本的字段全集。这样用户提交的不同版本的 YAML 文件，就都可以用这个 Super Version 对象来进行处理了。接下来，APIServer 会先后进行 Admission() 和 Validation() 操作。
+
+- APIServer 会把验证过的 API 对象转换成用户最初提交的版本，进行序列化操作，并调用 Etcd 的 API 把它保存起来。
+
+
+
+
