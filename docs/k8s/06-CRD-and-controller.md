@@ -60,10 +60,13 @@ spec:
   scope: Namespaced
 ```
 
+
 - metdata：name中的格式为：plural . groupl，此时这里的plural是network
 - group：设置API所属的组，将其映射为API url 中 apis/ 的下一级目录：pkg/apis/samplecrd/k8s/io
 - scope：该API生效范围，可以设置为：Namespaced（定义的Network是一个属于Namespace的对象）和Cluster（在集群范围内生效，不局限与任何Namesapce）默认值为Namespaced
 - versions：设置CRD支持的版本
+
+**它是Network API 资源类型的 API 部分的宏观定义**
 
 使用命令创建CRD对象，
 ```
@@ -75,37 +78,15 @@ NAME                        CREATED AT
 networks.samplecrd.k8s.io   2020-11-27T07:37:00Z
 ```
 
+定义了两部分：
+自定义资源类型的API描述，包括：组(Group)、版本(Version)、资源(Resource)
 
-```
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  # name must match the spec fields below, and be in the form: 
-  name: tasks.163yun.com
-spec:
-  # group name to use for REST API: /apis/<group>/<version>
-  group: 163yun.com
-  # version name to use for REST API: /apis/<group>/<version>
-  version: v1
-  # either Namespaced or Cluster
-  scope: Namespaced
-  names:
-    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
-    plural: tasks
-    # singular name to be used as an alias on the CLI and for display
-    singular: task
-    # kind is normally the CamelCased singular type. Your resource manifests use this.
-    kind: Task
-    # shortNames allow shorter string to match your resource on the CLI
-    shortNames:
-    - task
-```
+自定义资源类型的对象描述，Spec, Status
 
-name用于定义CRD名字，后缀需要跟group一致，
 
-声明了它的 scope 是 Namespaced，即：我们定义的这个 Network 是一个属于 Namespace 的对象，类似于 Pod。
+# More Information
 
-**它是Network API 资源类型的 API 部分的宏观定义**
+## Programming Kubernetes CRDs
 
 
 
