@@ -83,6 +83,42 @@ networks.samplecrd.k8s.io   2020-11-27T07:37:00Z
 
 自定义资源类型的对象描述，Spec, Status
 
+## 自定义控制器工作原理
+
+![](images/32e545dcd4664a3f36e95af83b571ec3.png)
+
+- 控制器从k8s的API Server中取出对象，在这里就是Network对象。这个操作是依赖于Informer(通知器)的代码库完成。
+
+```
+networkClient, err := clientset.NewForConfig(cfg)  // clientset 来自code generator
+networkInformerFactory := informers.NewSharedInformerFactory(networkClient, time.Second*30)
+```
+- Network Informer 正是使用这个 networkClient，跟 APIServer 建立了连接。不过，真正负责维护这个连接的，则是 Informer 所使用的 **Reflector 包**。
+
+Reflector 使用的是一种叫作 ListAndWatch 的方法，来“获取”并“监听”这些 Network 对象实例的变化。
+
+...其中工作原理略过
+
+
+##### 总结
+kubernetes API 编程范式的具体原理，
+这些自动生成的代码，就为我们提供了一个可靠而高效地获取API对象“期望状态”的编程库。
+作为开发者就只需要关注如何拿到“实际状态”，然后和“期望状态”做对比。
+
+
+已经了解到：
+- k8s内置编排对象
+- 对应控制器模式的实现原理
+- 自定义API资源类型和控制器的编写方式
+
+
+接下来：
+很多容器化工作，都会要求设计一个自己的编排对象，实现自己的控制器模式。
+这可以通过**插件机制**，不需要修改任何一行代码。
+
+## RBAC
+
+
 
 # More Information
 
