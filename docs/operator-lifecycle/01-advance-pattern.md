@@ -38,3 +38,13 @@ INFO[0000] Found annotations file                        bundle-dir=bundle conta
 INFO[0000] Could not find optional dependencies file     bundle-dir=bundle container-tool=docker
 INFO[0000] All validation tests have completed successfully
 ```
+
+
+
+
+```
+$ kubectl create namespace nginx-ns
+namespace/nginx-ns created
+```
+
+
