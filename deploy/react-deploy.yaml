@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  demo-react
+  namespace: default
+  labels:
+    app:   demo-react
+spec:
+  selector:
+    matchLabels:
+      app: demo-react
+  replicas: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:   demo-react
+    spec:
+      # initContainers:
+        # Init containers are exactly like regular containers, except:
+          # - Init containers always run to completion.
+          # - Each init container must complete successfully before the next one starts.
+      containers:
+      - name:   demo-react
+        image:  vanguo996/demoreact
+        ports:
+        - containerPort:  3000
+          name:   demo-react
