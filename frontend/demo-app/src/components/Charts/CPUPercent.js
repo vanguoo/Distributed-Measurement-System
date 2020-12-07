@@ -10,7 +10,7 @@ import {
   } from 'recharts';
 
 
-const socket = io('127.0.0.1:39002', {
+const socket = io('127.0.0.1:30935', {
   transports: ['websocket', 'polling']
 });
 
