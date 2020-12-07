@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: demo-react
-  replicas: 1
+  replicas: 2
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -26,7 +26,7 @@ spec:
           # - Each init container must complete successfully before the next one starts.
       containers:
       - name:   demo-react
-        image:  vanguo996/demoreact:v2
+        image:  vanguo996/demoreact
         ports:
         - containerPort:  3000
           name:   demo-react

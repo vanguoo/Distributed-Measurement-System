@@ -21,7 +21,7 @@ spec:
           # - Each init container must complete successfully before the next one starts.
       containers:
       - name:   cpu-server
-        image:  vanguo996/demo-repo:v1
+        image:  vanguo996/cpu-percent
         ports:
         - containerPort:  39002
           name:   cpu-server
