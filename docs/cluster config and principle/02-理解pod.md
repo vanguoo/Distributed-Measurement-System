@@ -11,7 +11,9 @@ Pod 里的所有容器，共享的是同一个 Network Namespace，并且可以�
 
 Pod 的实现需要使用一个中间容器，这个容器叫作 Infra 容器。在这个 Pod 中，Infra 容器永远都是第一个被创建的容器，而其他用户定义的容器，则通过 Join Network Namespace 的方式，与 Infra 容器关联在一起。这样的组织关系，可以用下面这样一个示意图来表达：
 
-![pod](images/pod.png)
+
+
+<img src="images/pod.png" alt="pod" style="zoom:40%;" />
 
 
 pod在kubernetes项目中有一个重要意义，就是**容器设计模式**

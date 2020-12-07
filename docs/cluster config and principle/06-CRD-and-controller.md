@@ -116,14 +116,4 @@ kubernetes API 编程范式的具体原理，
 很多容器化工作，都会要求设计一个自己的编排对象，实现自己的控制器模式。
 这可以通过**插件机制**，不需要修改任何一行代码。
 
-## RBAC
-
-
-
-# More Information
-
-## Programming Kubernetes CRDs
-
-
-
 

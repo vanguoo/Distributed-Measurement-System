@@ -1,16 +1,18 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name:  ms-frontend-http
+  name:  ms-frontend-nodeport
   namespace: default
 spec:
-  selector:
-    app: ms-frontend
   type: NodePort
   ports:
   - name: ms-frontend
     port: 80
     targetPort: 3000
-    protocol: TCP
+    nodePort: 30123
+  selector:
+    app: ms-frontend
+
+
     
 

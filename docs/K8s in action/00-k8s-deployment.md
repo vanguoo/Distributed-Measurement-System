@@ -1,4 +1,4 @@
-## 创建镜像
+## Docker初步
 
 #### nodejs服务:
 
@@ -88,7 +88,7 @@ $ docker build -t vanguo996/demoreact .
 
 
 
-## docker 容器间通信
+## Docker 容器间通信
 
 启动cpu-percent server
 
@@ -122,10 +122,6 @@ $ docker run -d --name react-frontend -p 3000:3000 vanguo996/demoreact
 
 ## kubernetes容器编排
 
-
-
-
-
 kubernetes是一种容器编排工具，在分布式系统中更系统地管理容器。
 
 kubectl 运行在本地客户端，客户端使用RESTful API 与 k8s集群中的“大脑”— *API Server* 通信。
@@ -136,7 +132,7 @@ kubectl 运行在本地客户端，客户端使用RESTful API 与 k8s集群中�
 
 
 
-### 部署pod
+### 部署Pod
 
 pod是k8s基本的调度对象，一个pod中有多个container，当然也可以只存在一个container。
 
@@ -269,7 +265,7 @@ spec:
 
 
 
-```sh
+```
 $ kubectl create -f react-service.yaml
 service/react-nodeport created
 $ kubectl get svc
@@ -355,20 +351,31 @@ pod是一个逻辑主机，可以说pod是一种轻量化的虚拟主机，
 
 
 
-![](https://tva1.sinaimg.cn/large/0081Kckwly1glf2kr9ptpj30jn0e0dhd.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glf2kr9ptpj30jn0e0dhd.jpg" alt="	" style="zoom:80%;" />
+
+
 
 通过标签可以选择那些pod创建服务
 
 
 
-![](https://tva1.sinaimg.cn/large/0081Kckwly1glf2m6nrkdj30l208u0tl.jpg)
-
-在[之前](#Service-API)创建好的Service中，ClusterIP表示在集群中可以访问此服务。
-
-在运行的容器中执行命令：
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glf2m6nrkdj30l208u0tl.jpg" style="zoom:80%;" />
 
 
 
+### 服务类型
 
 
-![](https://tva1.sinaimg.cn/large/0081Kckwly1glf2oowabvj30na0d5q4s.jpg)
+
+- *NodePort*，每个集群节点在节点本身打开端口，通过访问任一集群节点的此端口，就能访问到服务
+
+```
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+ms-frontend-nodeport   NodePort    10.102.207.82   <none>        80:30123/TCP   1s
+```
+
+- *LoadBalancer*，NodePort类型的一种扩展，服务可以通过负载均衡器来访问，
+- *Ingress*， 通过一个IP地址公开多个服务
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glf3986chuj30jf0fvgmt.jpg" style="zoom:80%;" />
+
