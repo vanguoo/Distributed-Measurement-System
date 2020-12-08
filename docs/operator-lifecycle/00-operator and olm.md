@@ -7,364 +7,6 @@ CRD则是用户自定义的k8s资源，CRD文件主要包括apiVersion、Kind、
 
 
 
-
-
-
-
-
-
-## etcd-operator
-
-示例文件：
-
-```
-$ git clone https://github.com/kubernetes-operators-book/chapters.git
-cd ch03
-```
-
-
-
-```
-├── etcd-cluster-cr.yaml
-├── etcd-operator-crd.yaml
-├── etcd-operator-deployment.yaml
-├── etcd-operator-rolebinding.yaml
-├── etcd-operator-role.yaml
-└── etcd-operator-sa.yaml
-```
-
-
-
-创建一个CRD:
-
-```
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: etcdclusters.etcd.database.coreos.com
-spec:
-  group: etcd.database.coreos.com
-  names:
-    kind: EtcdCluster
-    listKind: EtcdClusterList
-    plural: etcdclusters
-    shortNames:
-    - etcdclus
-    - etcd
-    singular: etcdcluster
-  scope: Namespaced
-  versions:
-  - name: v1beta2
-    served: true
-    storage: true
-```
-
-
-
-
-
-```sh
-$ kubectl create -f etcd-operator-crd.yaml
-customresourcedefinition.apiextensions.k8s.io/etcdclusters.etcd.database.coreos.com created
-```
-
-
-
-```sh
-$ kubectl get crd
-etcdclusters.etcd.database.coreos.com         2020-12-04T02:49:22Z
-```
-
-
-
-#### 身份认证：定义operator的Service Account
-
-#### 创建sa：
-
-```
-kubectl create -f etcd-operator-sa.yaml
-```
-
-
-
-```
-$ kubectl get sa
-NAME               SECRETS   AGE
-default            1         17h
-etcd-operator-sa   1         8s
-```
-
-
-
-
-
-```sh
-$ kubectl describe sa etcd-operator-sa
-Name:                etcd-operator-sa
-Namespace:           default
-Labels:              <none>
-Annotations:         <none>
-Image pull secrets:  <none>
-Mountable secrets:   etcd-operator-sa-token-hgxr8
-Tokens:              etcd-operator-sa-token-hgxr8
-Events:              <none>
-```
-
-
-
-查看自定义ServiceAccount秘钥
-
-```
-$ kubectl describe secret etcd-operator-sa-token-hgxr8
-Name:         etcd-operator-sa-token-hgxr8
-Namespace:    default
-[...]
-ca.crt:     1025 bytes
-namespace:  7 bytes
-```
-
-
-
-#### 关于ServiceAccount
-
-多个pod可以使用同一个sa，pod只能使用同一命名空间中的sa
-
-pod的manifest文件中，可以指定账户名称的方式将一个sa赋值给pod，不指定则是默认的sa
-
-可以通过将不同的sa赋值给pod**来控制每个pod可以访问的资源**。
-
-当api服务器接受到带有认证token的请求，服务器会用token来验证发送请求的客户端所关联的sa是否允许执行请求操作。
-
-api服务器通过管理员配置好的系统级别认证插件来获取这些信息，这个插件就是rbac。
-
-
-
-#### 了解RBAC
-
-rbac授权插件将用户角色作为决定用户能否执行操作的关键因素。如果用户有多个角色，用户能够做对应角色能够做的事情。
-
-- role 指定了在资源上恶意执行哪些动词
-- rolebinding 绑定到特定用户、组或者ServiceAccount上
-
-
-
-
-
-#### role
-
-role资源定义了哪些操作(HTTP请求)可以在哪些资源(RESTful 资源)上进行，它允许用户获取并列出了此命名空间中的服务。
-
-```
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: etcd-operator-role
-rules:
-- apiGroups:
-  - etcd.database.coreos.com
-  resources:
-  - etcdclusters
-  - etcdbackups
-  - etcdrestores
-  verbs:
-  - '*'
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
-  - events
-  verbs:
-  - '*'
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - '*'
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-```
-
-这个Role资源会在对应的命名空间中创建出来
-
-```
-$ kubectl create -f etcd-operator-role.yaml
-role.rbac.authorization.k8s.io/etcd-operator-role created
-```
-
-
-
-#### role binding
-
-绑定角色到ServiceAccount
-
-```sh
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: etcd-operator-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: etcd-operator-role
-subjects:
-- kind: ServiceAccount
-  name: etcd-operator-sa
-  namespace: default
-```
-
-
-
-```sh
-$  kubectl create -f etcd-operator-rolebinding.yaml
-rolebinding.rbac.authorization.k8s.io/etcd-operator-rolebinding created
-```
-
-
-
-
-
-### Deploying etcd Operator
-
-The Operator is a custom controller running in a pod, and it watches the EtcdCluster CR you defined earlier
-
-
-
-```
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: etcd-operator
-spec:
-  selector:
-    matchLabels:
-      app: etcd-operator
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: etcd-operator
-```
-
-
-
-
-
-```
-$ kubectl create -f etcd-operator-deployment.yaml
-deployment.apps/etcd-operator created
-```
-
-```
-$ kubectl get rs
-$ kubectl get deploy
-```
-
-
-
-
-
-```
-$ kubectl describe deploy/etcd-operator
-Name:                   etcd-operator
-Namespace:              default
-CreationTimestamp:      Fri, 04 Dec 2020 16:13:32 +0800
-Labels:                 <none>
-Annotations:            deployment.kubernetes.io/revision: 1
-Selector:               app=etcd-operator
-Replicas:               1 desired | 1 updated | 1 total | 0 available | 1 unavailable
-StrategyType:           RollingUpdate
-
-[...]
-
-Events:
-  Type    Reason             Age   From                   Message
-  ----    ------             ----  ----                   -------
-  Normal  ScalingReplicaSet  36s   deployment-controller  Scaled up replica set etcd-operator-d455d6d75 to 1
-```
-
-
-
-#### 声明一个EtcdCluster
-
-之前创建了一个叫EtcdCluster的CRD, 现在就有了一个operator监控这个EtcdCluster资源，比如可以定义资源在集群中的期望状态。
-
-两个sepc元素：
-
-- size - the number of etcd cluster members
-- version - etcd each of those members should run
-
-
-
-```
-$ kubectl create -f etcd-cluster-cr.yaml
-etcdcluster.etcd.database.coreos.com/example-etcd-cluster created
-```
-
-
-
-修改EtcdCluster数量, 在资源EtcdCluster中修改：
-
-```
-apiVersion: etcd.database.coreos.com/v1beta2
-kind: EtcdCluster
-metadata:
-  name: example-etcd-cluster
-spec:
-  size: 1 # 修改数量
-  version: 3.1.10
-```
-
-
-
-可以通过动态看到实例伸缩情况：
-
-```
-$ kubectl get pods -w
-```
-
-```
-example-etcd-cluster-q5pjpw46bd   1/1     Running   0          6m
-example-etcd-cluster-d7jb745rz8   1/1     Terminating   0          7m48s
-example-etcd-cluster-d7jb745rz8   0/1     Terminating   0          7m49s
-example-etcd-cluster-d7jb745rz8   0/1     Terminating   0          7m58s
-example-etcd-cluster-d7jb745rz8   0/1     Terminating   0          7m58s
-```
-
-
-
-```
-$ kubectl get svc
-example-etcd-cluster          ClusterIP   None            <none>        2379/TCP,2380/TCP   14m
-example-etcd-cluster-client   ClusterIP   10.101.52.169   <none>        2379/TCP            14m
-```
-
-
-
-
-
-```
-kubectl delete -f etcd-operator-sa.yaml
-kubectl delete -f etcd-operator-role.yaml
-kubectl delete -f etcd-operator-rolebinding.yaml
-kubectl delete -f etcd-operator-crd.yaml
-kubectl delete -f etcd-operator-deployment.yaml
-kubectl delete -f etcd-cluster-cr.yaml
-```
-
-
-
-
-
-
-
 # Operator-sdk框架
 
 ### operator
@@ -513,11 +155,125 @@ make generate
 
 [参考文档-olm](https://olm.operatorframework.io/docs/getting-started/)
 
-上一部分介绍了手动运行operator，下面介绍如何使用OLM为生产环境中的operator启用更强大的部署模型。
+上一部分介绍了手动运行operator，包括
+
+- 创建deployment
+- 添加CRD
+- 以及配置必要的权限
+
+OLM为生产环境中的operator启用更强大的部署模型。
 
 OLM提供一种陈述是的方式来安装、管理和升级Operator，以及在集群中所依赖的资源。对其管理的组件强制执行一些约束。
 
 OLM 可帮助您在 Kubernetes 集群中安装、更新所有 Operator（及其相关服务）并对其整个生命周期实施一般性管理。
+
+
+
+## 架构
+
+OLM由两个Operator组成，OLM Operator and Catalog Operator
+
+
+
+架构：
+
+| Resource              | Short Name | Owner   | Description                                    |
+| --------------------- | ---------- | ------- | :--------------------------------------------- |
+| ClusterServiceVersion | csv        | OLM     | 应用程序元数据：名称、版本、图标、资源、安装等 |
+| InstallPlan           | ip         | Catalog | 为自动安装或升级CSV而需创建的计算列表          |
+| CatalogSource         | catsrc     | Catalog | 一个软件包存储库                               |
+| Subscription          | sub        | Catalog | 跟踪*频道*来保持CSV更新                        |
+| OperatorGroup         | og         | OLM     | 用于对多个命名空间进行分组                     |
+
+
+
+每个Operator创建的资源：
+
+| Operator | Creatable Resources        |
+| -------- | -------------------------- |
+| OLM      | Deployment                 |
+| OLM      | Service Account            |
+| OLM      | (Cluster)Roles             |
+| OLM      | (Cluster)RoleBindings      |
+| Catalog  | Custom Resource Definition |
+| Catalog  | ClusterServiceVersion      |
+
+![](https://tva1.sinaimg.cn/large/0081Kckwly1glgi2fncn9j30jg0bwjsb.jpg)
+
+### Catalog Operator
+
+- 负责解析和安装**CSV**及其指定的所需资源。
+
+- 监视频道中的CatalogSource中是否有软件包更新，将其升级。实现参考文档：*[Catalog Polling](https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/catalog-polling.md)*
+
+- 跟踪频道中软件包的用户可创建**Subscription**资源，此资源配置所需软件包、频道和CatalogSource。找到更新后，代表用户将适当**InstallPlan**写入命名空间。
+- 用户可以直接创建InstallPlan，包含所需CSV和批准策略的名称，Catalog Operator 会为创建所有所需资源创建一个执行计划。批准后，Catalog Operator 将在 InstallPlan 中创建所有资源；然后单独满足 OLM Operator 的要求，从而继续安装 CSV。
+
+#### 工作流：
+
+- 拥有 CRD 和 CSV 缓存，按名称索引。
+- 监视是否有用户创建的未解析 InstallPlan：
+  - 查找与请求名称相匹配的 CSV，并将其添加为已解析的资源。
+  - 对于每个受管或所需 CRD，将其添加为已解析的资源。
+  - 对于每个所需 CRD，找到管理相应 CRD 的 CSV。
+- 监视是否有已解析的 InstallPlan 并为其创建已发现的所有资源（用户批准或自动）。
+- 监视 CatalogSource 和 Subscription，并根据它们创建 InstallPlan。
+
+
+
+### Catalog Registry
+
+Catalog Registry 存储 CSV 和 CRD 以便在集群中创建，并存储有关软件包和频道的元数据。
+
+*package manifest* 是 Catalog Registry 中的一个条目，用于将软件包标识与 CSV 集相关联。在软件包中，频道指向特定 CSV。因为 CSV 明确引用了所替换的 CSV，软件包清单向 Catalog Operator 提供了将 CSV 更新至频道中最新版本所需的信息，逐步安装和替换每个中间版本。
+
+
+
+### OLM Operator
+
+1. 集群中存在CSV中指定需要的资源后，OLM Operator 将负责部署由CSV资源定义的应用程序。
+
+2. OLM Operator不负责创建所需要的资源。用户可选择使用CLI手动创建这些资源，也可以使用Catalog来创建资源。
+
+   用户可以为CatalogOperator定义InstallPlan，使得Catalog Operator 实现InstallPlan
+
+> This separation of concerns enables users incremental buy-in of the OLM framework components. Users can choose to manually create these resources, or define an InstallPlan for the Catalog Operator or allow the Catalog Operator to develop and implement the InstallPlan. An operator creator does not need to learn about the full operator package system before seeing a working operator.
+
+3. 虽然OLM Operator通常被配置为监视所有命名空间, 但是也可与其他OLM Operator使其使用，只要管理的命名空间不同即可。
+
+#### 工作流：
+
+监视命名空间中的ClusterServiceVersion，并检查是否满足要求，如果满足，则运行 CSV 的安装策略。
+
+**此CSV必须为OperatorGroup的活跃成员才可运行该安装策略。**
+
+
+
+### ClusterServiceVersion Control Loop
+
+```
+           +------------------------------------------------------+
+           |                                                      |
+           |                                      +--> Succeeded -+
+           v                                      |               |
+None --> Pending --> InstallReady --> Installing -|               |
+           ^                                       +--> Failed <--+
+           |                                              |
+           +----------------------------------------------+
+\                                                                 /
+ +---------------------------------------------------------------+
+    |
+    v
+Replacing --> Deleting
+```
+
+
+
+
+
+
+
+
 
 
 
@@ -531,6 +287,20 @@ OLM 可帮助您在 Kubernetes 集群中安装、更新所有 Operator（及其�
 - ClusterServiceVersion(CSV)
 - CatalogSource
 - Subscrption
+
+概述：
+
+*CSV*是定义了operator元数据的列表，可以用来描述operator以及operator的依赖。
+
+拥有CSV的多个operator被列在*catalog*中，
+
+Users then *subscribe* to an Operator from the catalog to tell OLM to provision and manage a desired Operator
+
+同时，operator又管理集群中的应用或服务
+
+
+
+
 
 ### 1. ClusterServiceVersion
 CSV类似于linux安装包，比如rpm，其中就包括了如何安装operator以及相关依赖。
@@ -668,8 +438,6 @@ kubemod                                    Community Operators   11h
 
 > 注意：如果没有出现operator安装包，意味着什么?
 
-解释：
-
 ```sh
 $ kubectl explain packagemanifest
 KIND:     PackageManifest
@@ -686,8 +454,19 @@ DESCRIPTION:
 
 ## 实例：安装etcd-Operator
 
+定义一个operatorGroup，为 OLM 安装的 Operator 提供多租户配置。
 
-- 定义一个operatorgroup，指定operator将要控制的namespace，
+### OperatorGroup
+
+[redhat doc](https://access.redhat.com/documentation/zh-cn/openshift_container_platform/4.2/html/operators/olm-understanding-operatorgroups)
+
+[github doc](https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/operatorgroups.md)
+
+关于operatorGroup： OperatorGroup 选择**一组目标命名空间**，在其中为其成员 Operator 生成所需的 RBAC 访问权限。
+
+> define an OperatorGroup to dictate which namespaces the Operator will manage.
+
+
 
 ```
 apiVersion: operators.coreos.com/v1alpha2
@@ -700,7 +479,22 @@ spec:
   - default
 ```
 
-> which channel you want to subscribe to?
+```
+$ kubectl apply -f all-og.yaml
+operatorgroup.operators.coreos.com/default-og created
+
+$ kubectl get operatorgroups
+NAME         AGE
+default-og   11h
+```
+
+
+
+### Subscription
+
+
+
+**subscription** 能够触发安装operator流程，在这之前，需要决定哪个channel需要subscribe 
 
 
 
@@ -708,17 +502,82 @@ olm 提供了 channel information ：
 (类似安装包信息)
 
 ```
-kubectl describe packagemanifest/etcd -n olm
+$ kubectl describe packagemanifest/etcd -n olm
 Name:         etcd
 Namespace:    olm
 Labels:       catalog=operatorhubio-catalog
               catalog-namespace=olm
-			  [...]
+              operatorframework.io/arch.amd64=supported
+              operatorframework.io/os.linux=supported
+              provider=CNCF
+              provider-url=
+Annotations:  <none>
+API Version:  packages.operators.coreos.com/v1
+Kind:         PackageManifest
+Metadata:
+  Creation Timestamp:  2020-12-07T08:16:12Z
+  Self Link:           /apis/packages.operators.coreos.com/v1/namespaces/olm/packagemanifests/etcd
+Spec:
+Status:
+  Catalog Source:               operatorhubio-catalog
+      Provider:
+        Name:  CNCF
+      Related Images:
+        quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b
+      Version:    0.9.4-clusterwide
+    Name:         clusterwide-alpha
+    Current CSV:  etcdoperator.v0.9.4
+    Current CSV Desc:
+      Annotations:
+        Alm - Examples:  [   # [1]
+ # [2]
+]
+
+    
+      Install Modes: # [3]
+        Supported:  true
+        Type:       OwnNamespace
+        Supported:  true    #[4]
+        Type:       SingleNamespace
+        Supported:  false
+        Type:       MultiNamespace
+        Supported:  false
+        Type:       AllNamespaces
+      Keywords:
+        etcd
+        key value
+        database
+        coreos
+      Provider:
+        Name:  CNCF
+      Related Images:
+        quay.io/coreos/etcd-operator@sha256:66a37fd61a06a43969854ee6d3e21087a98b93838e284a6086b13917f96b0d9b
+      Version:      0.9.4
+    Name:           singlenamespace-alpha
+  Default Channel:  singlenamespace-alpha [5]
+  Package Name:     etcd
+  Provider:
+    Name:  CNCF
+Events:    <none>
 ```
 
 
 
-- once you decided on a channel, the last step is to create the subscription resource itself:
+[1] 
+
+[2] 
+
+[3] 安装模式
+
+[4] 这个频道提供了operator，可以监控一种命名空间
+
+[5]选择的channel
+
+
+
+
+
+在确定了channel之后，最后一步是创建一个subscription resource 
 
 ```
 apiVersion: operators.coreos.com/v1alpha1
@@ -733,13 +592,12 @@ spec:
   channel: singlenamespace-alpha # [4]
 ```
 
-1. this manifest install the substription and **the operator deployment itself, in the default namespace**
-
+1. 在默认命名空间安装
 2. 表示要安装的operator名称，可以由packagemanifest API 查找
-
-3. source and sourceNamespace 描述在catalogsource 中可以找到operator
-
+3. source and sourceNamespace 描述在catalogsource 中
 4. olm会从这个channel安装operator
+
+
 
 执行：
 
@@ -754,6 +612,8 @@ $ kubectl get csv -n default
 NAME                  DISPLAY   VERSION   REPLACES              PHASE
 etcdoperator.v0.9.4   etcd      0.9.4     etcdoperator.v0.9.2   Succeeded
 ```
+
+
 
 CSV实际上是一个安装包，这正是subscription所安装的东西。OLM就是一个operator的安装过程，这个过程又被定义在CSV中，用来去创建operator pods本身。
 
@@ -827,6 +687,12 @@ clusterserviceversion.operators.coreos.com "etcdoperator.v0.9.4" deleted
 - OLM在同样的namespace中创建了CSV 资源，其中这个CSV 包括了创建operator的deployment对象的具体清单。
 - OLM 用deployment 清单(Manifest) 来创建了deployment 资源， 持有者(owner) 是CSV
 - 最后deployment 通过 replica set 部署pod
+
+
+
+
+
+
 
 
 
