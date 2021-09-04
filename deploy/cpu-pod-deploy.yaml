@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-pod
+  namespace: default
+  labels:
+    app: cpu-pod
+spec:
+  containers:
+  - name: cpu-pod
+    image: "vanguo996/cpu-percent"
+    ports:
+    - containerPort:  39002
+      name:  http

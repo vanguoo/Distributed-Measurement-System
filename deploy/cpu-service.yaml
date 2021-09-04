@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name:  cpu-nodeport-service
+  namespace: default
+spec:
+  selector:
+    app:  cpu-nodeport-service
+  type: NodePort
+  ports:
+  - name:  cpu-nodeport-service
+    port: 80
+    targetPort: 39002
+    protocol: TCP
