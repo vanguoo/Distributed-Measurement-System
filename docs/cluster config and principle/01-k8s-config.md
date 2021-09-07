@@ -60,25 +60,26 @@ apt-get update
 
 找不到公钥错误：
 
-```
-GPG error: http://mirrors.ustc.edu.cn/kubernetes/apt kubernetes-xenial InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 6A030B21BA07F4FB
-```
-
-添加公钥：
-
-```
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6A030B21BA07F4FB
-```
-
 > ref: https://zhuanlan.zhihu.com/p/46341911  &&  https://blog.csdn.net/yz1988computer/article/details/81675553
 
 
 
-下载
+ubuntu下载kubectl, kubelet,  kubeadm
 
 ```
 apt-get update
 apt-get install -y kubelet kubeadm kubectl
+```
+
+centos安装kubectl, kubelet,  kubeadm
+
+```
+yum install -y kubectl kubelet kubeadm
+
+systemctl enable kubelet
+
+systemctl start kubelet
+
 ```
 
 
@@ -350,9 +351,6 @@ kubectl taint node van-master node-role.kubernetes.io/master-
 
 
 
-
-
-## 加入windows节点
 
 
 
