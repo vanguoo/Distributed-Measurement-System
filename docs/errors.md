@@ -41,3 +41,11 @@ https://blog.csdn.net/yunweimao/article/details/106880516
 ```
 $ kubectl describe node localhost.localdomain
 ```
+
+
+#### git错误
+
+Missing or invalid credentials.
+
+ssh-keygen -t rsa -b 4096 -C "guowang939@gmail.com"
+
