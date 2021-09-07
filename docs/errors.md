@@ -34,3 +34,10 @@ Kubernetes会将该Pod从服务代理的分发后端去除，不再分发请求�
 https://blog.csdn.net/yunweimao/article/details/106880516
 
 
+#### 某一个节点notReady
+
+
+使用describe 查看日志
+```
+$ kubectl describe node localhost.localdomain
+```

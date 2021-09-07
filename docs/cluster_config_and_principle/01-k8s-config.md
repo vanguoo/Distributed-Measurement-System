@@ -176,10 +176,7 @@ kubeadm join 192.168.0.101:6443 --token y28ukv.di3fwf6maxm5zxi0 \
 ```
 
 
-
-使用token加入 集群，但是token是24小时制
-有关token操作 ：https://kubernetes.io/zh/docs/reference/setup-tools/kubeadm/kubeadm-token/
-
+- 查看token的过期时间
 ```
 root@k8s-master:/etc/kubernetes/manifests# kubeadm token list
 TOKEN                     TTL         EXPIRES                     USAGES                   DESCRIPTION                                                EXTRA GROUPS
@@ -187,12 +184,10 @@ bd2i8l.nqg2pzbgucebx5k4   21h         2020-11-23T17:08:54+08:00   authentication
 
 ```
 
-如果没有sha256的值，可以执行：
+- 查看sha256的值
 
-```root@k8s-master:/etc/kubernetes/manifests# openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | \
->    openssl dgst -sha256 -hex | sed 's/^.* //'
-8e91db11a11dcaf48a04aca39a8654d6989a9357f2327aa5e6d54d818d30277a
-
+```
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
 ```
 
 token过期以后：执行
@@ -204,24 +199,8 @@ kubeadm token create --print-join-command
 工作节点加入：
 
 ```
-root@k8s-node1:/home/van# kubeadm join 192.168.1.112:6443 --token bd2i8l.nqg2pzbgucebx5k4 \
->     --discovery-token-ca-cert-hash sha256:8e91db11a11dcaf48a04aca39a8654d6989a9357f2327aa5e6d54d818d30277a
-W1122 21:07:39.858251  110188 join.go:346] [preflight] WARNING: JoinControlPane.controlPlane settings will be ignored when control-plane flag is not set.
-[preflight] Running pre-flight checks
-	[WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
-[preflight] Reading configuration from the cluster...
-[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
-[kubelet-start] Downloading configuration for the kubelet from the "kubelet-config-1.18" ConfigMap in the kube-system namespace
-[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
-[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
-[kubelet-start] Starting the kubelet
-[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
-
-This node has joined the cluster:
-* Certificate signing request was sent to apiserver and a response was received.
-* The Kubelet was informed of the new secure connection details.
-
-Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+root@k8s-node1:/home/van# kubeadm join 192.168.1.112:6443 --token <token> \
+>     --discovery-token-ca-cert-hash sha256: <sha256>
 
 ```
 加入成功
